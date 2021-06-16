@@ -42,7 +42,6 @@ class FreightBill(LoginView):
         odoo_login = login()
         self.odoo = odoo_login
 
-    @staticmethod
     def request_extract_parameters(self, request_data):
         parameter_dict = {}
         parameter_username_dict = {}
