@@ -3,13 +3,13 @@ import datetime
 from django.conf import settings
 
 
-def create_token(payload, timeout=1):
+def create_token(payload, timeout=5):
 
     salt = settings.SECRET_KEY
     headers = {
         'typ': 'jwt',
         'alg': 'HS256'
     }
-    payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(minutes=timeout)
+    payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(weeks=timeout)
     token = jwt.encode(payload=payload, key=salt, algorithm="HS256", headers=headers)
     return token.decode()
