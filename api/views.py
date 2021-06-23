@@ -1,13 +1,15 @@
 import json
 import odoorpc
 import urllib.error
-from api.parameter.input_parameter import *
 from odoorpc.error import RPCError
+from django.shortcuts import render
 from rest_framework.views import APIView
 from django.shortcuts import HttpResponse
 from api.utils.jwt_auth import create_token
+from api.parameter.input_parameter import *
 from django.views.decorators.csrf import csrf_exempt
 from api.extensions.auth import JwtQueryParamsAuthentication
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 class LoginView(APIView):
@@ -52,24 +54,25 @@ class ProLoginView(LoginView):
             self.login_obj(self.odoo_obj, username, password)
         except RPCError as loginError:
             return HttpResponse(json.dumps({'code': 1000, 'error': loginError.args[0]}))
-        # if 'sale.order' in odoo.env:
-        #     res_partner_id = odoo.env['res.partner'].search([('email', '=', username)])
         token = create_token({'id': res_partner_id, 'name': username})
         response_data = {'code': 1001, 'data': token}
         return HttpResponse(json.dumps(response_data))
 
 
-class ProSearchOrderUsernamePricesView(LoginView):
+class ProSearchFreightUsernamePricesView(LoginView):
     authentication_classes = [JwtQueryParamsAuthentication, ]
 
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         odoo_obj = odoorpc.ODOO.load(request.user['name'])
+
         if 'sale.order' in odoo_obj.env:
             request_data = request.query_params
             request_username_value = request_get_username_value(request_data)
             parameter_other_dict = request_get_other_value(request_data)
             freight_ids = []
+            if request_username_value and parameter_other_dict is None:
+                odoo_obj.read()
             if request_username_value:
                 name_id = odoo_obj.env['res.partner'].search([('name', '=', request_username_value)])
                 if name_id:
@@ -93,10 +96,57 @@ class ProSearchOrderUsernamePricesView(LoginView):
             return HttpResponse(json.dumps(search_data), content_type="application/json")
 
 
-class DownloadImg(APIView):
+class ProStatisticsFreightView(LoginView):
     authentication_classes = [JwtQueryParamsAuthentication, ]
 
     @csrf_exempt
     def get(self, request, *args, **kwargs):
+        odoo_obj = odoorpc.ODOO.load(request.user['name'])
+        odoo_obj.env['fixed.freight_bill'].search(args)
         request_data = request.query_params
+        result_freight = {}
+        if 'this_year_freight' in request_data:
+            this_year_freight = request_get_this_year_freight(odoo_obj)
+            result_freight = this_year_freight
+        if 'last_year_freight' in request_data:
+            last_year_freight = request_get_last_year_freight(odoo_obj)
+            result_freight = last_year_freight
+        if 'today_freight' in request_data:
+            today_freight = request_today_freight(odoo_obj)
+            result_freight = today_freight
+        if 'yesterday_freight' in request_data:
+            yesterday_freight = request_yesterday_freight(odoo_obj)
+            result_freight = yesterday_freight
+        return HttpResponse(json.dumps(result_freight), content_type="application/json")
+
+
+# def listing(request):
+#     contact_list = Contacts.objects.all()
+#     paginator = Paginator(contact_list, 25)  # Show 25 contacts per page
+#
+#     page = request.GET.get('page')
+#     try:
+#         contacts = paginator.page(page)
+#     except PageNotAnInteger:
+#         # If page is not an integer, deliver first page.
+#         contacts = paginator.page(1)
+#     except EmptyPage:
+#         # If page is out of range (e.g. 9999), deliver last page of results.
+#         contacts = paginator.page(paginator.num_pages)
+#
+#     return render(request, 'list.html', {'contacts': contacts})
+
+
+class ProStatisticsFreightDetailView(APIView):
+    authentication_classes = [JwtQueryParamsAuthentication, ]
+
+    @csrf_exempt
+    def get(self, request, *args, **kwargs):
+        odoo_obj = odoorpc.ODOO.load(request.user['name'])
+        odoo_obj.env['fixed.freight_bill'].search(args)
+        request_data = request.query_params
+        if 'start_date' and 'end_date' in request_data:
+            freight_detail_list = request_freight_detail(request_data, odoo_obj)
+            return HttpResponse(json.dumps(freight_detail_list), content_type="application/json")
+
 
