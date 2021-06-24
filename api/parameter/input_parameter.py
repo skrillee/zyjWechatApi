@@ -38,7 +38,7 @@ def request_get_other_value(request_data) -> dict or None:
             pass
 
 
-def on_ids_models_search_result(parameter) -> tuple:
+def on_ids_models_search_result(parameter) -> list:
     """
     Args:
         parameter (dict): Include ids , model , search_field , odoo_obj , username
@@ -47,34 +47,33 @@ def on_ids_models_search_result(parameter) -> tuple:
         browse_value_list(list): Amount of all orders
     """
     browse_data_list = []
-    browse_value_list = []
     ids = parameter['ids']
-    username = parameter['username']
     model = parameter['model']
-    search_field = parameter['search_field']
     model = parameter['odoo_obj'].env[model]
     for name in ids:
         browse_data = model.browse(name).read()
-        browse_value_list.append({username: browse_data[0][search_field]})
         browse_data_list.append(browse_data)
-    return browse_data_list, browse_value_list
+    return browse_data_list
 
 
-def on_ids_models_search_result_sum_total(search_value) -> dict:
+def on_ids_freight_bill_search_result_detail(odoo_obj, search_freight_bill_data) -> list:
     """
     Args:
-        search_value (list): Amount of all freights
+        search_freight_bill_data (list): freight_bill freight_line_ids
+        odoo_obj(object): odoo object
     Returns:
-        result_data(dict): Total amount of all freights
+        result_data(dict): freight_bill_ids -> freight_line_line
     """
-    result_data = {}
-    for data in search_value:
-        for dict_data_key, dict_data_value in data.items():
-            if 'total' in result_data.keys():
-                new_value = result_data['total'] + dict_data_value
-                result_data.update({'total': new_value})
-            else:
-                result_data.update({'total': dict_data_value})
+    result_data = []
+    for freight in search_freight_bill_data:
+        freight_line_detail = []
+        freight_line_ids = freight[0]['freight_line_ids']
+        if freight_line_ids:
+            for freight_line in freight_line_ids:
+                browse_data = odoo_obj.env['fixed.freight_bill.line'].browse(freight_line).read()
+                freight_line_detail.append(browse_data)
+        freight[0]['freight_line_detail'] = freight_line_detail
+        result_data.append(freight)
     return result_data
 
 

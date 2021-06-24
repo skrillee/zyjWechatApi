@@ -85,15 +85,12 @@ class ProSearchFreightUsernamePricesView(LoginView):
             parameter = {
                 'ids': freight_ids,
                 'model': 'fixed.freight_bill',
-                'search_field': 'amount_total_signed',
                 'odoo_obj': odoo_obj,
-                'username': request_username_value
             }
-            search_data, search_value = on_ids_models_search_result(parameter)
-            amount_total_signed = on_ids_models_search_result_sum_total(search_value)
-            search_data.append([amount_total_signed])
-            search_data.append([{'username': request_username_value}])
-            return HttpResponse(json.dumps(search_data), content_type="application/json")
+            search_freight_bill_data = on_ids_models_search_result(parameter)
+            search_freight_bill_data_detail = on_ids_freight_bill_search_result_detail(odoo_obj,
+                                                                                       search_freight_bill_data)
+            return HttpResponse(json.dumps(search_freight_bill_data_detail), content_type="application/json")
 
 
 class ProStatisticsFreightView(LoginView):
