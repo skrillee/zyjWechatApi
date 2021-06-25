@@ -56,25 +56,20 @@ def on_ids_models_search_result(parameter) -> list:
     return browse_data_list
 
 
-def on_ids_freight_bill_search_result_detail(odoo_obj, search_freight_bill_data) -> list:
+def on_ids_freight_bill_search_result_detail(odoo_obj, freight_line_ids) -> list:
     """
     Args:
-        search_freight_bill_data (list): freight_bill freight_line_ids
+        freight_line_ids (list): freight_line_ids
         odoo_obj(object): odoo object
     Returns:
         result_data(dict): freight_bill_ids -> freight_line_line
     """
-    result_data = []
-    for freight in search_freight_bill_data:
-        freight_line_detail = []
-        freight_line_ids = freight[0]['freight_line_ids']
-        if freight_line_ids:
-            for freight_line in freight_line_ids:
-                browse_data = odoo_obj.env['fixed.freight_bill.line'].browse(freight_line).read()
-                freight_line_detail.append(browse_data)
-        freight[0]['freight_line_detail'] = freight_line_detail
-        result_data.append(freight)
-    return result_data
+    freight_line_detail = []
+    if freight_line_ids:
+        for freight_line in freight_line_ids:
+            browse_data = odoo_obj.env['fixed.freight_bill.line'].browse(freight_line).read()
+            freight_line_detail.append(browse_data)
+    return freight_line_detail
 
 
 # "end_last_year_datetime" and "yesterday_datetime" Should not be used as a return parameter
@@ -106,8 +101,9 @@ def request_get_this_year_freight(odoo_obj):
         domain=[('date_invoice', '<=', this_year_today), ('date_invoice', '>=', beginning_this_year)],
         fields=['date_invoice', 'amount_total', 'id'],
         groupby=['date_invoice'])
-    freight_this_year[0]['start_date'] = beginning_this_year
-    freight_this_year[0]['end_date'] = this_year_today
+    if freight_this_year:
+        freight_this_year[0]['start_date'] = beginning_this_year
+        freight_this_year[0]['end_date'] = this_year_today
     return freight_this_year
 
 
@@ -116,8 +112,9 @@ def request_get_last_year_freight(odoo_obj):
         domain=[('date_invoice', '<=', end_last_year), ('date_invoice', '>=', beginning_last_year)],
         fields=['date_invoice', 'amount_total', 'id'],
         groupby=['date_invoice'])
-    freight_last_year[0]['start_date'] = beginning_last_year
-    freight_last_year[0]['end_date'] = end_last_year
+    if freight_last_year:
+        freight_last_year[0]['start_date'] = beginning_last_year
+        freight_last_year[0]['end_date'] = end_last_year
     return freight_last_year
 
 
@@ -126,8 +123,9 @@ def request_today_freight(odoo_obj):
         domain=[('date_invoice', '=', this_year_today)],
         fields=['date_invoice', 'amount_total', 'id'],
         groupby=['date_invoice'])
-    freight_today[0]['start_date'] = this_year_today
-    freight_today[0]['end_date'] = this_year_today
+    if freight_today:
+        freight_today[0]['start_date'] = this_year_today
+        freight_today[0]['end_date'] = this_year_today
     return freight_today
 
 
@@ -136,8 +134,9 @@ def request_yesterday_freight(odoo_obj):
         domain=[('date_invoice', '=', yesterday)],
         fields=['date_invoice', 'amount_total', 'id'],
         groupby=['date_invoice'])
-    freight_yesterday[0]['start_date'] = yesterday
-    freight_yesterday[0]['end_date'] = yesterday
+    if freight_yesterday:
+        freight_yesterday[0]['start_date'] = yesterday
+        freight_yesterday[0]['end_date'] = yesterday
     return freight_yesterday
 
 

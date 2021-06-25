@@ -73,6 +73,8 @@ class ProSearchFreightUsernamePricesView(LoginView):
             freight_ids = []
             if request_username_value and parameter_other_dict is None:
                 odoo_obj.read()
+
+            # Pass in the ID of the username and return the freight_ids
             if request_username_value:
                 name_id = odoo_obj.env['res.partner'].search([('name', '=', request_username_value)])
                 if name_id:
@@ -87,9 +89,17 @@ class ProSearchFreightUsernamePricesView(LoginView):
                 'model': 'fixed.freight_bill',
                 'odoo_obj': odoo_obj,
             }
+            # return all the freight that belong to someone
             search_freight_bill_data = on_ids_models_search_result(parameter)
-            search_freight_bill_data_detail = on_ids_freight_bill_search_result_detail(odoo_obj,
-                                                                                       search_freight_bill_data)
+            search_freight_bill_data_detail = []
+
+            # Pass in the ID of the freight_line_id and return the detail of data
+            for freight in search_freight_bill_data:
+                freight_line_ids = freight[0]['freight_line_ids']
+                if freight_line_ids:
+                    freight_line_detail = on_ids_freight_bill_search_result_detail(odoo_obj, freight_line_ids)
+                    freight[0]['freight_line_detail'] = freight_line_detail
+                search_freight_bill_data_detail.append(freight)
             return HttpResponse(json.dumps(search_freight_bill_data_detail), content_type="application/json")
 
 
@@ -144,6 +154,23 @@ class ProStatisticsFreightDetailView(APIView):
         request_data = request.query_params
         if 'start_date' and 'end_date' in request_data:
             freight_detail_list = request_freight_detail(request_data, odoo_obj)
-            return HttpResponse(json.dumps(freight_detail_list), content_type="application/json")
+            search_freight_bill_data_detail = []
+            for freight in freight_detail_list:
+                if freight:
+                    freight_line_ids = freight['freight_line_ids']
+                    freight_line_detail = on_ids_freight_bill_search_result_detail(odoo_obj, freight_line_ids)
+                    freight['freight_line_detail'] = freight_line_detail
+                search_freight_bill_data_detail.append(freight)
+            paginator = Paginator(search_freight_bill_data_detail, 20, 9)
+            page = request_data['page']
+            try:
+                contacts = paginator.page(page)
+            except PageNotAnInteger:
+                # If page is not an integer, deliver first page.
+                contacts = paginator.page(1)
+            except EmptyPage:
+                # If page is out of range (e.g. 9999), deliver last page of results.
+                contacts = paginator.page(paginator.num_pages)
+            return HttpResponse(json.dumps(contacts.object_list), content_type="application/json")
 
 
