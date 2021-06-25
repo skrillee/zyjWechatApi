@@ -107,11 +107,37 @@ def request_get_this_year_freight(odoo_obj):
     return freight_this_year
 
 
+def request_get_this_year_freight_by_partner(odoo_obj):
+    freight_this_year = odoo_obj.env['fixed.freight_bill'].read_group(
+        domain=[('date_invoice', '<=', this_year_today), ('date_invoice', '>=', beginning_this_year)],
+        fields=['date_invoice', 'amount_total', 'id'],
+        groupby=['partner_id'],
+        orderby='amount_total'
+    )
+    if freight_this_year:
+        freight_this_year[0]['start_date'] = beginning_this_year
+        freight_this_year[0]['end_date'] = this_year_today
+    return freight_this_year
+
+
 def request_get_last_year_freight(odoo_obj):
     freight_last_year = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '<=', end_last_year), ('date_invoice', '>=', beginning_last_year)],
         fields=['date_invoice', 'amount_total', 'id'],
         groupby=['date_invoice'])
+    if freight_last_year:
+        freight_last_year[0]['start_date'] = beginning_last_year
+        freight_last_year[0]['end_date'] = end_last_year
+    return freight_last_year
+
+
+def request_get_last_year_freight_by_partner(odoo_obj):
+    freight_last_year = odoo_obj.env['fixed.freight_bill'].read_group(
+        domain=[('date_invoice', '<=', end_last_year), ('date_invoice', '>=', beginning_last_year)],
+        fields=['date_invoice', 'amount_total', 'id'],
+        groupby=['partner_id'],
+        orderby='amount_total'
+    )
     if freight_last_year:
         freight_last_year[0]['start_date'] = beginning_last_year
         freight_last_year[0]['end_date'] = end_last_year

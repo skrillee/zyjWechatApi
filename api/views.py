@@ -112,12 +112,20 @@ class ProStatisticsFreightView(LoginView):
         odoo_obj.env['fixed.freight_bill'].search(args)
         request_data = request.query_params
         result_freight = {}
-        if 'this_year_freight' in request_data:
+        if 'this_year_freight' in request_data and 'date_month' in request_data:
             this_year_freight = request_get_this_year_freight(odoo_obj)
             result_freight = this_year_freight
-        if 'last_year_freight' in request_data:
+        if 'this_year_freight' in request_data and 'partner_id' in request_data:
+            this_year_freight_by_partner = request_get_this_year_freight_by_partner(odoo_obj)
+            this_year_freight_by_partner.reverse()
+            result_freight = this_year_freight_by_partner
+        if 'last_year_freight' in request_data and 'date_month' in request_data:
             last_year_freight = request_get_last_year_freight(odoo_obj)
             result_freight = last_year_freight
+        if 'last_year_freight' in request_data and 'partner_id' in request_data:
+            last_year_freight_by_partner = request_get_last_year_freight_by_partner(odoo_obj)
+            last_year_freight_by_partner.reverse()
+            result_freight = last_year_freight_by_partner
         if 'today_freight' in request_data:
             today_freight = request_today_freight(odoo_obj)
             result_freight = today_freight
