@@ -107,6 +107,19 @@ def request_get_this_year_freight(odoo_obj):
     return freight_this_year
 
 
+def reverse_list_add_amount_position(parameter):
+    n = len(parameter)
+    asc_order = 0
+    desc_order = n+1
+    for i in range(n // 2):
+        asc_order += 1
+        desc_order -= 1
+        parameter[i]['order'] = desc_order
+        parameter[n - i - 1]['order'] = asc_order
+        parameter[i], parameter[n - i - 1] = parameter[n - i - 1], parameter[i]
+    return parameter
+
+
 def request_get_this_year_freight_by_partner(odoo_obj):
     freight_this_year = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '<=', this_year_today), ('date_invoice', '>=', beginning_this_year)],
@@ -114,10 +127,12 @@ def request_get_this_year_freight_by_partner(odoo_obj):
         groupby=['partner_id'],
         orderby='amount_total'
     )
-    freight_this_year.reverse()
+    freight_this_year = reverse_list_add_amount_position(freight_this_year)
+
     if freight_this_year:
         freight_this_year[0]['start_date'] = beginning_this_year
         freight_this_year[0]['end_date'] = this_year_today
+        freight_this_year[0]['total_number_of_agent'] = len(freight_this_year)
     return freight_this_year
 
 
@@ -139,9 +154,11 @@ def request_get_last_year_freight_by_partner(odoo_obj):
         groupby=['partner_id'],
         orderby='amount_total'
     )
+    freight_last_year = reverse_list_add_amount_position(freight_last_year)
     if freight_last_year:
         freight_last_year[0]['start_date'] = beginning_last_year
         freight_last_year[0]['end_date'] = end_last_year
+        freight_last_year[0]['total_number_of_agent'] = len(freight_last_year)
     return freight_last_year
 
 
