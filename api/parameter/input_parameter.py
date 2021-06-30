@@ -114,6 +114,7 @@ def request_get_this_year_freight_by_partner(odoo_obj):
         groupby=['partner_id'],
         orderby='amount_total'
     )
+    freight_this_year.reverse()
     if freight_this_year:
         freight_this_year[0]['start_date'] = beginning_this_year
         freight_this_year[0]['end_date'] = this_year_today
