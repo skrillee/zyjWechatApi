@@ -109,7 +109,7 @@ class ProStatisticsFreightView(LoginView):
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         odoo_obj = odoorpc.ODOO.load(request.user['name'])
-        odoo_obj.env['fixed.freight_bill'].search(args)
+        # odoo_obj.env['fixed.freight_bill'].search(args)
         request_data = request.query_params
         result_freight = {}
         if 'this_year_freight' in request_data and 'date_month' in request_data:
@@ -117,14 +117,13 @@ class ProStatisticsFreightView(LoginView):
             result_freight = this_year_freight
         if 'this_year_freight' in request_data and 'partner_id' in request_data:
             this_year_freight_by_partner = request_get_this_year_freight_by_partner(odoo_obj)
-            this_year_freight_by_partner
             result_freight = this_year_freight_by_partner
         if 'last_year_freight' in request_data and 'date_month' in request_data:
             last_year_freight = request_get_last_year_freight(odoo_obj)
             result_freight = last_year_freight
         if 'last_year_freight' in request_data and 'partner_id' in request_data:
             last_year_freight_by_partner = request_get_last_year_freight_by_partner(odoo_obj)
-            last_year_freight_by_partner
+            last_year_freight_by_partner.reverse()
             result_freight = last_year_freight_by_partner
         if 'today_freight' in request_data:
             today_freight = request_today_freight(odoo_obj)
@@ -158,7 +157,7 @@ class ProStatisticsFreightDetailView(APIView):
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         odoo_obj = odoorpc.ODOO.load(request.user['name'])
-        odoo_obj.env['fixed.freight_bill'].search(args)
+        # odoo_obj.env['fixed.freight_bill'].search(args)
         request_data = request.query_params
         if 'start_date' and 'end_date' in request_data:
             freight_detail_list = request_freight_detail(request_data, odoo_obj)
@@ -181,4 +180,16 @@ class ProStatisticsFreightDetailView(APIView):
                 contacts = paginator.page(paginator.num_pages)
             return HttpResponse(json.dumps(contacts.object_list), content_type="application/json")
 
+
+class ProSearchSomeoneFreightView(LoginView):
+    authentication_classes = [JwtQueryParamsAuthentication, ]
+
+    @csrf_exempt
+    def get(self, request, *args, **kwargs):
+        odoo_obj = odoorpc.ODOO.load(request.user['name'])
+        # odoo_obj.env['fixed.freight_bill'].search(args)
+        request_data = request.query_params
+        if 'search_name' and 'search_type' in request_data:
+            freight_detail_list = on_search_name_type_search_total(request_data, odoo_obj)
+            return HttpResponse(json.dumps(freight_detail_list), content_type="application/json")
 

@@ -215,3 +215,21 @@ def request_freight_detail(request_data, odoo_obj):
         freight_detail_list.append(freight_detail)
     return freight_detail_list
 
+
+def on_search_name_type_search_total(request_data, odoo_obj):
+    freight_ids = odoo_obj.env['res.partner'].search(
+        [
+         ('name', '=', request_data['search_name']),
+         ]
+    )
+    someone_freight_list = []
+    if freight_ids:
+        for freight_id in freight_ids:
+            freight_someone_total = odoo_obj.env['fixed.freight_bill'].read_group(
+                domain=[('partner_id', '=', freight_id)],
+                fields=['date_invoice', 'amount_total', 'id'],
+                groupby=['date_invoice'])
+            freight_someone_total[0]['name'] = request_data['search_name']
+            someone_freight_list.append(freight_someone_total)
+    return someone_freight_list
+
