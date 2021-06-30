@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^pro/order/', views.ProSearchFreightUsernamePricesView.as_view()),
     url(r'^pro/freight/', views.ProStatisticsFreightView.as_view()),
     url(r'^pro/freight_detail/', views.ProStatisticsFreightDetailView.as_view()),
+    url(r'^pro/search_someone/freight_total/', views.ProSearchSomeoneFreightView.as_view()),
 ]
 
