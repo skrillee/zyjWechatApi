@@ -222,7 +222,6 @@ def on_search_name_type_search_total(request_data, odoo_obj):
          ('name', '=', request_data['search_name']),
          ]
     )
-    someone_freight_list = []
     if freight_ids:
         for freight_id in freight_ids:
             freight_someone_total = odoo_obj.env['fixed.freight_bill'].read_group(
@@ -230,6 +229,5 @@ def on_search_name_type_search_total(request_data, odoo_obj):
                 fields=['date_invoice', 'amount_total', 'id'],
                 groupby=['date_invoice'])
             freight_someone_total[0]['name'] = request_data['search_name']
-            someone_freight_list.append(freight_someone_total)
-    return someone_freight_list
+            return freight_someone_total
 
