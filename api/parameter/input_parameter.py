@@ -228,6 +228,11 @@ def on_search_name_type_search_total(request_data, odoo_obj):
                 domain=[('partner_id', '=', freight_id)],
                 fields=['date_invoice', 'amount_total', 'id'],
                 groupby=['date_invoice'])
-            freight_someone_total[0]['name'] = request_data['search_name']
+            freight_someone_total[0]['total_invoice'] = 0
+            freight_someone_total[0]['total_freight'] = 0
+            for freight_someone_month in freight_someone_total:
+                freight_someone_month['name'] = request_data['search_name']
+                freight_someone_total[0]['total_invoice'] += freight_someone_month['amount_total']
+                freight_someone_total[0]['total_freight'] += freight_someone_month['date_invoice_count']
             return freight_someone_total
 
