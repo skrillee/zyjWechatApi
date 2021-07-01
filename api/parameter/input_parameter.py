@@ -5,6 +5,8 @@
 # @FileName: input_parameter.py
 # @Software: Pycharm
 from datetime import datetime, timedelta
+import pypinyin
+from collections import defaultdict
 
 
 def request_get_username_value(request_data) -> str or None:
@@ -235,4 +237,28 @@ def on_search_name_type_search_total(request_data, odoo_obj):
                 freight_someone_total[0]['total_invoice'] += freight_someone_month['amount_total']
                 freight_someone_total[0]['total_freight'] += freight_someone_month['date_invoice_count']
             return freight_someone_total
+
+
+def contact_name_to_pinyin(last_name):
+    rows = pypinyin.pinyin(last_name, style=pypinyin.NORMAL)
+    return ''.join(row[0][0] for row in rows if len(row) > 0)
+
+
+def on_contact_name_search_by_letter_index(odoo_obj, *args):
+    contact_name_order_by_contact_name = []
+    contact_name_list = odoo_obj.env['res.partner'].search_read([], ['name'],  offset='', limit='')
+    for contact_name in contact_name_list:
+        contact_letter_index = contact_name_to_pinyin(contact_name['name'][0])
+        contact_name[contact_letter_index] = contact_name['name']
+        contact_name_order_by_contact_name.append(contact_name)
+    return contact_name_order_by_contact_name
+
+
+def on_contact_name_search_detail(request_data, odoo_obj, *args):
+    request_contact_name = request_data['contact_name']
+    if request_contact_name:
+        browse_data = odoo_obj.env['res.partner'].search_read(domain=[('name', '=', request_contact_name)],
+                                                              fields=['name', 'street', 'mobile', 'create_date'],
+                                                              offset='', limit=1)
+        return browse_data
 
