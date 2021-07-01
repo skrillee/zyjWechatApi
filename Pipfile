@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 gunicorn = "*"
+pypinyin = {version = "*", index = "https://pypi.tuna.tsinghua.edu.cn/simple"}
 
 [dev-packages]
 
