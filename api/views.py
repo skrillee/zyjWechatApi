@@ -151,7 +151,7 @@ class ProStatisticsFreightView(LoginView):
 #     return render(request, 'list.html', {'contacts': contacts})
 
 
-class ProStatisticsFreightDetailView(APIView):
+class ProStatisticsFreightDetailView(LoginView):
     authentication_classes = [JwtQueryParamsAuthentication, ]
 
     @csrf_exempt
@@ -192,4 +192,32 @@ class ProSearchSomeoneFreightView(LoginView):
         if 'search_name' and 'search_type' in request_data:
             freight_detail_list = on_search_name_type_search_total(request_data, odoo_obj)
             return HttpResponse(json.dumps(freight_detail_list), content_type="application/json")
+
+
+class ProSearchContact(LoginView):
+    authentication_classes = [JwtQueryParamsAuthentication, ]
+
+    @csrf_exempt
+    def get(self, request, *args, **kwargs):
+        odoo_obj = odoorpc.ODOO.load(request.user['name'])
+        # odoo_obj.env['fixed.freight_bill'].search(args)
+        request_data = request.query_params
+        if 'contact_name' in request_data:
+            if request_data['contact_name']:
+                on_contact_name_detail = on_contact_name_search_detail(request_data, odoo_obj)
+                return HttpResponse(json.dumps(on_contact_name_detail),
+                                    content_type="application/json")
+            else:
+                contact_name_order_by_contact_name_list = on_contact_name_search_by_letter_index(odoo_obj)
+                contact_name_order_by_letter_index = defaultdict(list)
+                for dic in contact_name_order_by_contact_name_list:
+                    for key, val in dic.items():
+                        contact_name_order_by_letter_index[key].append(val)
+                contact_name_order_by_letter_index_dict = dict(contact_name_order_by_letter_index)
+                contact_name_order_by_letter_index_dict['total_number'] = len(
+                    contact_name_order_by_letter_index_dict['name']
+                )
+                return HttpResponse(json.dumps(contact_name_order_by_letter_index_dict),
+                                    content_type="application/json")
+
 
