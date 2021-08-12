@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7d759bfb13ba84bf2fb89d03a0bf46bb16ac8ad4e4824db6d4bc15da9c99b16b"
+            "sha256": "b766eea9988d122efaa1ae1589392c65cc9fc5f6c412a6b65cde5a26ff57eb5d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,6 +23,14 @@
             ],
             "index": "pypi",
             "version": "==20.1.0"
+        },
+        "pypinyin": {
+            "hashes": [
+                "sha256:c2f003b303bd2338d440c7e57f7073e6db8d6f72ca6444fe45dcbca7a0a1d3a1",
+                "sha256:ddc03f5d318d6276bb9fd069555ee934b6fd43548f9606f63d2be1a998b19e0b"
+            ],
+            "index": "https://pypi.tuna.tsinghua.edu.cn/simple",
+            "version": "==0.42.0"
         }
     },
     "develop": {}
