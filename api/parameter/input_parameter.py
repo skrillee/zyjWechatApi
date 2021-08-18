@@ -6,7 +6,6 @@
 # @Software: Pycharm
 from datetime import datetime, timedelta
 import pypinyin
-from collections import defaultdict
 
 
 def request_get_username_value(request_data) -> str or None:
@@ -74,31 +73,44 @@ def on_ids_freight_bill_search_result_detail(odoo_obj, freight_line_ids) -> list
     return freight_line_detail
 
 
-# "end_last_year_datetime" and "yesterday_datetime" Should not be used as a return parameter
-end_last_year_datetime = datetime(datetime.now().year, 1, 1) - timedelta(days=1)
-yesterday_datetime = datetime.now()-timedelta(days=1)
+def time_set():
 
+    # "end_last_year_datetime" and "yesterday_datetime" Should not be used as a return parameter
+    end_last_year_datetime = datetime(datetime.now().year, 1, 1) - timedelta(days=1)
+    yesterday_datetime = datetime.now()-timedelta(days=1)
 
-one_day = timedelta(days=1)
-yesterday = str(
-    yesterday_datetime.year) + '-' + str(
-    yesterday_datetime.month) + '-' + str(
-    yesterday_datetime.day)
-this_year_today = str(
-    datetime.now().year) + '-' + str(
-    datetime.now().month) + '-' + str(
-    datetime.now().day)
-beginning_this_year = str(
-    datetime.now().year) + '-' + '1-1'
-beginning_last_year = str(
-    datetime.now().year - 1) + '-' + '1-1'
-end_last_year = str(
-    end_last_year_datetime.year) + '-' + str(
-    end_last_year_datetime.month) + '-' + str(
-    end_last_year_datetime.day)
+    one_day = timedelta(days=1)
+    yesterday = str(
+        yesterday_datetime.year) + '-' + str(
+        yesterday_datetime.month) + '-' + str(
+        yesterday_datetime.day)
+    this_year_today = str(
+        datetime.now().year) + '-' + str(
+        datetime.now().month) + '-' + str(
+        datetime.now().day)
+    beginning_this_year = str(
+        datetime.now().year) + '-' + '1-1'
+    beginning_last_year = str(
+        datetime.now().year - 1) + '-' + '1-1'
+    end_last_year = str(
+        end_last_year_datetime.year) + '-' + str(
+        end_last_year_datetime.month) + '-' + str(
+        end_last_year_datetime.day)
+    time_dict = {
+        one_day: one_day,
+        yesterday: yesterday,
+        this_year_today: this_year_today,
+        beginning_this_year: beginning_this_year,
+        beginning_last_year: beginning_last_year,
+        end_last_year: end_last_year,
+    }
+    return time_dict
 
 
 def request_get_this_year_freight(odoo_obj):
+    time_set_dict = time_set()
+    this_year_today = time_set_dict['this_year_today']
+    beginning_this_year = time_set_dict['beginning_this_year']
     freight_this_year = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '<=', this_year_today), ('date_invoice', '>=', beginning_this_year)],
         fields=['date_invoice', 'amount_total', 'id'],
@@ -123,6 +135,9 @@ def reverse_list_add_amount_position(parameter):
 
 
 def request_get_this_year_freight_by_partner(odoo_obj):
+    time_set_dict = time_set()
+    this_year_today = time_set_dict['this_year_today']
+    beginning_this_year = time_set_dict['beginning_this_year']
     freight_this_year = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '<=', this_year_today), ('date_invoice', '>=', beginning_this_year)],
         fields=['date_invoice', 'amount_total', 'id'],
@@ -139,6 +154,9 @@ def request_get_this_year_freight_by_partner(odoo_obj):
 
 
 def request_get_last_year_freight(odoo_obj):
+    time_set_dict = time_set()
+    end_last_year = time_set_dict['end_last_year']
+    beginning_last_year = time_set_dict['beginning_last_year']
     freight_last_year = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '<=', end_last_year), ('date_invoice', '>=', beginning_last_year)],
         fields=['date_invoice', 'amount_total', 'id'],
@@ -150,6 +168,9 @@ def request_get_last_year_freight(odoo_obj):
 
 
 def request_get_last_year_freight_by_partner(odoo_obj):
+    time_set_dict = time_set()
+    end_last_year = time_set_dict['end_last_year']
+    beginning_last_year = time_set_dict['beginning_last_year']
     freight_last_year = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '<=', end_last_year), ('date_invoice', '>=', beginning_last_year)],
         fields=['date_invoice', 'amount_total', 'id'],
@@ -165,6 +186,8 @@ def request_get_last_year_freight_by_partner(odoo_obj):
 
 
 def request_today_freight(odoo_obj):
+    time_set_dict = time_set()
+    this_year_today = time_set_dict['this_year_today']
     freight_today = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '=', this_year_today)],
         fields=['date_invoice', 'amount_total', 'id'],
@@ -176,6 +199,8 @@ def request_today_freight(odoo_obj):
 
 
 def request_yesterday_freight(odoo_obj):
+    time_set_dict = time_set()
+    yesterday = time_set_dict['yesterday']
     freight_yesterday = odoo_obj.env['fixed.freight_bill'].read_group(
         domain=[('date_invoice', '=', yesterday)],
         fields=['date_invoice', 'amount_total', 'id'],
