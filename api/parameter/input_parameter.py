@@ -97,12 +97,12 @@ def time_set():
         end_last_year_datetime.month) + '-' + str(
         end_last_year_datetime.day)
     time_dict = {
-        one_day: one_day,
-        yesterday: yesterday,
-        this_year_today: this_year_today,
-        beginning_this_year: beginning_this_year,
-        beginning_last_year: beginning_last_year,
-        end_last_year: end_last_year,
+        'one_day': one_day,
+        'yesterday': yesterday,
+        'this_year_today': this_year_today,
+        'beginning_this_year': beginning_this_year,
+        'beginning_last_year': beginning_last_year,
+        'end_last_year': end_last_year,
     }
     return time_dict
 
