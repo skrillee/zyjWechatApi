@@ -4,7 +4,7 @@
 # @Author  : yanzhe(skrillee)
 # @FileName: input_parameter.py
 # @Software: Pycharm
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pypinyin
 from collections import defaultdict
 
@@ -81,14 +81,8 @@ def time_set():
     yesterday_datetime = datetime.now()-timedelta(days=1)
 
     one_day = timedelta(days=1)
-    yesterday = str(
-        yesterday_datetime.year) + '-' + str(
-        yesterday_datetime.month) + '-' + str(
-        yesterday_datetime.day)
-    this_year_today = str(
-        datetime.now().year) + '-' + str(
-        datetime.now().month) + '-' + str(
-        datetime.now().day)
+    yesterday = (date.today() + timedelta(days=-1)).strftime("%Y-%m-%d")
+    this_year_today = date.today().strftime("%Y-%m-%d")
     beginning_this_year = str(
         datetime.now().year) + '-' + '1-1'
     beginning_last_year = str(
@@ -97,6 +91,7 @@ def time_set():
         end_last_year_datetime.year) + '-' + str(
         end_last_year_datetime.month) + '-' + str(
         end_last_year_datetime.day)
+    last_week = (date.today() + timedelta(days=-7)).strftime("%Y-%m-%d")
     time_dict = {
         'one_day': one_day,
         'yesterday': yesterday,
@@ -104,6 +99,7 @@ def time_set():
         'beginning_this_year': beginning_this_year,
         'beginning_last_year': beginning_last_year,
         'end_last_year': end_last_year,
+        'last_week': last_week
     }
     return time_dict
 
@@ -120,6 +116,38 @@ def request_get_this_year_freight(odoo_obj):
         freight_this_year[0]['start_date'] = beginning_this_year
         freight_this_year[0]['end_date'] = this_year_today
     return freight_this_year
+
+
+def request_get_last_week_freight(odoo_obj):
+    time_set_dict = time_set()
+    last_week = time_set_dict['last_week']
+    this_year_today = time_set_dict['this_year_today']
+    freight_ids = odoo_obj.env['fixed.freight_bill'].search(
+        ['&',
+         ('date_invoice', '>=', last_week),
+         ('date_invoice', '<=', this_year_today)
+         ]
+    )
+    freight_last_week = []
+    total_number_of_agent = 0
+    for freight_id in freight_ids:
+        browse_data = odoo_obj.env['fixed.freight_bill'].browse(freight_id).read()[0]
+        partner_id = browse_data['partner_id']
+
+        amount_total = browse_data['amount_total']
+        date_invoice = browse_data['date_invoice']
+        partner_name = partner_id[-1]
+        total_number_of_agent += amount_total
+        freight_detail = {
+            'amount_total': amount_total,
+            'partner_name': partner_name,
+            'date_invoice': date_invoice,
+        }
+        freight_last_week.append(freight_detail)
+    freight_last_week[0]['start_time'] = last_week
+    freight_last_week[0]['end_time'] = this_year_today
+    freight_last_week[0]['total_number_of_agent'] = total_number_of_agent
+    return freight_last_week
 
 
 def reverse_list_add_amount_position(parameter):
