@@ -316,3 +316,28 @@ def on_contact_name_search_detail(request_data, odoo_obj, *args):
                                                               offset='', limit=1)
         return browse_data
 
+
+def search_all_brand(odoo_obj, *args):
+    all_brand = odoo_obj.env['zyjproduct.product_manufacturers'].search_read([], ['manufacturer_of_manufacturer'],
+                                                                             offset='', limit='')
+    return all_brand
+
+
+def search_product_according_brand(odoo_obj, request_data):
+    request_data_brand = request_data['search_brand']
+    search_brand = odoo_obj.env['zyj_agent_product.version'].search_read([
+        ('manufacturers_id', '=', request_data_brand)], ['version_name', 'version_date'],
+        offset='', limit='')
+    return search_brand
+
+
+def search_model_according_product(odoo_obj, request_data):
+    request_data_model = request_data['search_model']
+    search_model = odoo_obj.env['zyj_agent_product.model'].search_read([
+        ('version_id', '=', request_data_model)], ['model_number_name', 'remark'],
+        offset='', limit=''
+    )
+    return search_model
+
+
+

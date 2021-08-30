@@ -17,8 +17,8 @@ class LoginView(APIView):
     def __init__(self):
         super().__init__()
         self.ip = '47.92.85.245'
-        self.port = '3366'
-        self.dbname = 'odoo'
+        self.port = '3368'
+        self.dbname = 'odootest'
 
     def __call__(self, odoo, username, password):
         odoo = self.odoo_instance()
@@ -227,3 +227,28 @@ class ProSearchContact(LoginView):
                 )
                 return HttpResponse(json.dumps(contact_name_order_by_letter_index_dict),
                                     content_type="application/json")
+
+
+class ProAllBrand(LoginView):
+    authentication_classes = [JwtQueryParamsAuthentication, ]
+
+    @csrf_exempt
+    def get(self, request, *args, **kwargs):
+        odoo_obj = odoorpc.ODOO.load(request.user['name'])
+        request_data = request.query_params
+        if 'search_brand' in request_data:
+            search_brand = search_product_according_brand(odoo_obj, request_data)
+            return HttpResponse(json.dumps(search_brand), content_type="application/json")
+        elif 'search_model' in request_data:
+            search_model = search_model_according_product(odoo_obj, request_data)
+            return HttpResponse(json.dumps(search_model), content_type="application/json")
+        else:
+            first_id = 1
+            all_brands = []
+            all_brands_id_dict = search_all_brand(odoo_obj)
+            for brand in all_brands_id_dict:
+                brand['search_id'] = first_id
+                first_id += 1
+                all_brands.append(brand)
+            return HttpResponse(json.dumps(all_brands), content_type="application/json")
+

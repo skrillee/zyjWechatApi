@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^pro/freight_detail/', views.ProStatisticsFreightDetailView.as_view()),
     url(r'^pro/search_someone/freight_total/', views.ProSearchSomeoneFreightView.as_view()),
     url(r'^pro/contacts/search_name/', views.ProSearchContact.as_view()),
+    url(r'^pro/brand/brand', views.ProAllBrand.as_view()),
+    # url(r'^pro/slideshow/', views.SlideShow.as_view()),
     # url(r'^pro/contacts/search_detail/', views.ProSearchContactDetail.as_view()),
 ]
 
