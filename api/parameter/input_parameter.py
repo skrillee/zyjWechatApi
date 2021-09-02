@@ -318,7 +318,7 @@ def on_contact_name_search_detail(request_data, odoo_obj, *args):
 
 
 def search_all_brand(odoo_obj, *args):
-    all_brand = odoo_obj.env['zyjproduct.product_manufacturers'].search_read([], ['manufacturer_of_manufacturer'],
+    all_brand = odoo_obj.env['zyj_agent_product.manufacturers'].search_read([], ['manufacturer_of_manufacturer'],
                                                                              offset='', limit='')
     return all_brand
 
